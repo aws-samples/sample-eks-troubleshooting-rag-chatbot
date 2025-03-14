@@ -1,0 +1,53 @@
+# Core dependencies
+setuptools>=73.0.1
+wheel>=0.42.0
+pip>=24.0
+
+# AWS
+boto3>=1.35.3
+botocore>=1.35.3
+s3transfer>=0.10.2
+jmespath>=1.0.1
+opensearch-py>=2.8.0
+requests-aws4auth>=1.3.1
+
+# Web Framework
+fastapi>=0.115.2
+uvicorn>=0.30.6
+starlette>=0.40.0
+python-multipart>=0.0.18
+
+# HTTP and Networking
+httpx>=0.27.0
+httpcore>=1.0.5
+h11>=0.14.0
+anyio>=4.4.0
+sniffio>=1.3.1
+aiofiles>=23.2.1
+websockets>=12.0
+
+# UI & Visualization
+gradio>=5.12.0
+gradio_client>=1.5.4
+
+# Utilities
+python-dateutil>=2.9.0
+pytz>=2024.1
+six>=1.16.0
+tqdm>=4.66.5
+regex>=2024.7.24
+typing_extensions>=4.12.2
+pydantic>=2.8.2
+pydantic_core>=2.20.1
+annotated-types>=0.7.0
+
+# Serialization & Parsing
+PyYAML>=6.0.2
+
+# CLI & Terminal
+click>=8.1.7
+colorama>=0.4.6
+rich>=13.7.1
+Pygments>=2.18.0
+markdown-it-py>=3.0.0
+mdurl>=0.1.2

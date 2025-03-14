@@ -1,7 +1,8 @@
 import re
 import subprocess
 import shlex
-from bedrock_client import invoke_claude
+from bedrock_client import invoke_claude, invoke_deepseek_vllm
+from logger import logger
 
 
 def extract_kubectl_commands(response_text):
@@ -70,7 +71,7 @@ def execute_kubectl_command(command_str):
         return f"Error processing command: {str(e)}"
 
 
-def generate_response_with_kubectl(prompt_text):
+def generate_response_with_kubectl(prompt_text, model_option="deepseek"):
     """
     Generates a response using Claude via Bedrock, executes any kubectl commands,
     and sends the kubectl results back to the Claude model for further interpretation.
@@ -79,11 +80,15 @@ def generate_response_with_kubectl(prompt_text):
     :return: The final response from the model, including interpretation of kubectl output.
     """
     # Step 1: Invoke Claude with the initial prompt
-    initial_response = invoke_claude(prompt_text)
+    initial_response = ""
+    if model_option == 'claude':
+        initial_response = invoke_claude(prompt_text)
+    else:
+        initial_response = invoke_deepseek_vllm(prompt_text)
 
     # Step 2: Extract any kubectl commands from the model's response
     kubectl_commands = extract_kubectl_commands(initial_response)
-    print(kubectl_commands)
+    logger.debug(kubectl_commands)
     # Step 3: If kubectl commands are found, execute them
     kubectl_output = []
     if kubectl_commands:
@@ -96,11 +101,14 @@ def generate_response_with_kubectl(prompt_text):
             initial_response + "\n\n" + "\n".join(kubectl_output)
 
         # Step 4: Pass the combined result back to Claude for interpretation
-        followup_prompt = f"{
-            combined_output}\n\nPlease interpret the kubectl output above without issuing new kubectl commands."
+        followup_prompt = f"{combined_output}\n\nPlease interpret the kubectl output above without issuing new kubectl commands."
 
         # Step 5: Invoke Claude again with the combined response and kubectl results
-        final_response = invoke_claude(followup_prompt)
+        final_response = ""
+        if model_option == 'claude':
+            final_response = invoke_claude(followup_prompt)
+        else:
+            final_response = invoke_deepseek_vllm(followup_prompt)
 
         return final_response
 

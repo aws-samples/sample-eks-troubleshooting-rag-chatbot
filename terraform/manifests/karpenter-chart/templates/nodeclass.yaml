@@ -1,0 +1,52 @@
+{{- range .Values.nodeClasses }}
+{{- if .enabled }}
+---
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: {{ .name }}
+spec:
+  amiFamily: {{ .amiFamily }}
+  
+  {{- if .amiSelectorTerms }}
+  amiSelectorTerms:
+    {{- range .amiSelectorTerms }}
+    {{- if .alias }}
+    - alias: {{ .alias }}
+    {{- else if .name }}
+    - name: {{ .name }}
+      {{- if .owners }}
+      owners: {{ .owners }}
+      {{- end }}
+    {{- else if .tags }}
+    - tags:
+      {{- range $key, $value := .tags }}
+      {{ $key }}: {{ $value | quote }}
+      {{- end }}
+    {{- end }}
+    {{- end }}
+  {{- end }}
+  
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: {{ $.Values.clusterName }}
+  
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: {{ $.Values.clusterName }}
+  
+  tags:
+    karpenter.sh/discovery: {{ $.Values.clusterName }}
+  
+  role: {{ $.Values.clusterName }}
+  
+  blockDeviceMappings:
+  {{- range .blockDeviceMappings }}
+    - deviceName: {{ .deviceName }}
+      ebs:
+        volumeSize: {{ .volumeSize }}
+        volumeType: {{ .volumeType }}
+        encrypted: {{ .encrypted }}
+  {{- end }}
+{{- end }}
+{{- end }}

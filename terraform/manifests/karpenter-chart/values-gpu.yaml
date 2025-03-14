@@ -1,0 +1,50 @@
+# GPU configuration for Karpenter resources
+# This file contains only the GPU NodeClass and NodePool
+
+clusterName: ""  # Will be set from Terraform
+
+# NodeClasses configuration
+nodeClasses:
+  - enabled: true
+    name: "gpu-nodeclass"
+    amiFamily: "AL2"
+    amiSelectorTerms:
+      - name: "amazon-eks-gpu-node-1.31-*"
+        owners: ["amazon"]
+    blockDeviceMappings:
+      - deviceName: "/dev/xvda"
+        volumeSize: "200Gi"
+        volumeType: "gp3"
+        encrypted: true
+
+# NodePools configuration
+nodePools:
+  - enabled: true
+    name: "gpu-nodepool"
+    labels:
+      owner: "data-engineer"
+      nvidia.com/gpu.present: "true"
+    nodeClassRef:
+      name: "gpu-nodeclass"
+      kind: "EC2NodeClass"
+      group: "karpenter.k8s.aws"
+    requirements:
+      - key: "karpenter.k8s.aws/instance-family"
+        operator: "In"
+        values: ["g5", "g6"]
+      - key: "karpenter.k8s.aws/instance-size"
+        operator: "In"
+        values: ["xlarge", "2xlarge", "4xlarge", "8xlarge", "12xlarge", "16xlarge"]
+      - key: "karpenter.sh/capacity-type"
+        operator: "In"
+        values: ["on-demand", "spot"]
+    taints:
+      - key: "nvidia.com/gpu"
+        value: "true"
+        effect: "NoSchedule"
+    disruption:
+      consolidationPolicy: "WhenEmptyOrUnderutilized"
+      consolidateAfter: "30s"
+    limits:
+      cpu: "1000"
+      memory: "1000Gi"

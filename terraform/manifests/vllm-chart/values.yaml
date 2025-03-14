@@ -1,0 +1,50 @@
+namespace: deepseek
+replicaCount: 1
+
+containerPort: 8000
+
+image:
+  repository: vllm/vllm-openai
+  tag: latest
+  pullPolicy: IfNotPresent
+
+nodeSelector: {}
+
+tolerations: []
+
+cacheVolume:
+  path: /tmp/deepseek
+
+shmVolume:
+  sizeLimit: 2Gi
+
+command: "vllm serve __MODEL_NAME_AND_PARAMETERS__"
+
+resources:
+  limits:
+    cpu: "32"
+    memory: 100G
+  requests:
+    cpu: "16"
+    memory: 30G
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 60
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 60
+  periodSeconds: 5
+
+env: []

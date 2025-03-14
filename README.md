@@ -37,15 +37,6 @@ First, you need to provision the necessary AWS resources, including the S3 bucke
     ./install.sh
     ```
 
-    After running the Terraform script, it will output the name of the S3 bucket as an environment variable:
-
-    ```bash
-    export BUCKET_NAME=$(terraform output -raw bucket_name)
-
-    cd ../
-    ```
-
-
 ### Step 2: Deploy Problem Pods for Testing
 
 You can deploy problem pods into your EKS cluster to generate logs for testing. Use the provided bash script to deploy these pods:
@@ -57,11 +48,9 @@ You can deploy problem pods into your EKS cluster to generate logs for testing. 
 This script will create various pods that are likely to generate errors and logs, which the chatbot can then use for troubleshooting.
 
 ### Step 3: Configure Environment Variables
-The chatbot uses a set of environment variables to determine the behavior of the application. Set these before running the chatbot.
-- **PREFIX**: The S3 path to fetch logs from, based on the format `YYYY/MM/DD/`
-- **BUCKET_NAME**: The bucket where logs are stored for retrieval (Default: eks-llm-troubleshooting-logs-rag-eks)
-- **DOWNLOAD_DATA**: Determines if new logs will be pulled down from S3 on runtime. (Default: True)
-
+The chatbot uses an environment variables to determine the behavior of the application. Set these before running the chatbot.
+- **OPENSEARCH_ENDPOINT**:  The OpenSearch endpoint provided as an output from the terraform apply.
+- **AWS_DEFAULT_REGION**: The region to be used by the ChatBot
 
 ### Step 4: Run the Chatbot
 
@@ -76,7 +65,7 @@ python app.py
 
 This will start a Gradio interface where you can interact with the chatbot on `http://localhost:7860/`. Type your query into the interface, and the chatbot will retrieve and display relevant logs from the S3 bucket.
 
-*If you recieve an access denied API error, ensure your AWS account has access to `claude-3-sonnet-20240229-v1:0` in the correct region.*
+*If you recieve an access denied API error, ensure your AWS account has access to `claude-3-sonnet-20240229-v1:0` and `amazon.titan-embed-text-v2:0` in the correct region.*
 
 ### Configuration
 
@@ -92,28 +81,10 @@ Once the chatbot is running, you can use it to troubleshoot logs from the proble
 1. Empty S3 logs bucket
 2. `terraform destroy --auto-approve`
 
-## Project Structure
-
-- `rag-chatbot/`
-    - `app.py`: The main application script that runs the Gradio interface.
-    - `indexer.py`: Handles indexing of log data using FAISS.
-    - `embedder.py`: Encodes data and queries for retrieval.
-    - `retriever.py`: Retrieves relevant documents based on encoded queries.
-    - `s3_utils.py`: Handles interactions with S3, including downloading logs.
-    - `bedrock_client.py`: Handles requests to Amazon Bedrock.
-    - `data_loader`: Loads data from chunks and filter data.
-    - `kubernetes_resource.py`: Regex function to get model kubectl command, and execute it passing the results back to bedrock.
-- `terraform/`
-    - `variables.tf`: Terraform variable definitions.
-    - `main.tf`: Terraform configuration for provisioning AWS resources.
-    - `kinesis.tf`: Terraform configuration to provision Kinesis resources for logging stack.
-    - `outputs.tf`: Terraform configuration to output bucket name.
-
 ## Acknowledgments
 
 This project uses:
 
-- [FAISS](https://github.com/facebookresearch/faiss) for efficient similarity search.
 - [Gradio](https://www.gradio.app/) for the user interface.
 - [Terraform AWS EKS Blueprints](https://github.com/aws-ia/terraform-aws-eks-blueprints) as the basis for provisioning the infrastructure.
 
