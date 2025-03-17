@@ -1,0 +1,55 @@
+# Default values for karpenter-resources
+# This is a YAML-formatted file.
+
+clusterName: ""  # Will be set from Terraform
+
+# NodeClasses configuration
+nodeClasses:
+  - enabled: true
+    name: "default"
+    amiFamily: "AL2023"
+    amiSelectorTerms:
+      - alias: al2023@latest
+    blockDeviceMappings:
+      - deviceName: "/dev/xvda"
+        volumeSize: "100Gi"
+        volumeType: "gp3"
+        encrypted: true
+
+# NodePools configuration
+nodePools:
+  - enabled: true
+    name: "default"
+    labels:
+      billing-team: "my-team"
+    annotations:
+      example.com/owner: "my-team"
+    nodeClassRef:
+      name: "default"
+      kind: "EC2NodeClass"
+      group: "karpenter.k8s.aws"
+    requirements:
+      - key: "karpenter.k8s.aws/instance-category"
+        operator: "In"
+        values: ["c", "m", "r"]
+      - key: "karpenter.k8s.aws/instance-size"
+        operator: "In"
+        values: ["small", "medium"]
+      - key: "kubernetes.io/arch"
+        operator: "In"
+        values: ["arm64", "amd64"]
+      - key: "karpenter.sh/capacity-type"
+        operator: "In"
+        values: ["spot", "on-demand"]
+    disruption:
+      consolidationPolicy: "WhenEmptyOrUnderutilized"
+      consolidateAfter: "1m"
+      budgets:
+        - nodes: "10%"
+        - schedule: "0 9 * * mon-fri"
+          duration: "8h"
+          nodes: "0"
+    limits:
+      cpu: "4000m"  # Intentionally low to cause failures
+      memory: "8Gi"  # Intentionally low to cause failures
+    # weight: 10

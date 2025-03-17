@@ -1,0 +1,99 @@
+{{- range .Values.nodePools }}
+{{- if .enabled }}
+---
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: {{ .name }}
+spec:
+  template:
+    metadata:
+      {{- if .labels }}
+      labels:
+        {{- range $key, $value := .labels }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      {{- end }}
+      {{- if .annotations }}
+      annotations:
+        {{- range $key, $value := .annotations }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      {{- end }}
+    spec:
+      nodeClassRef:
+        name: {{ .nodeClassRef.name }}
+        kind: {{ .nodeClassRef.kind }}
+        group: {{ .nodeClassRef.group }}
+      
+      {{- if .taints }}
+      taints:
+        {{- range .taints }}
+        - key: {{ .key }}
+          effect: {{ .effect }}
+          {{- if .value }}
+          value: {{ .value | quote }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      
+      {{- if .startupTaints }}
+      startupTaints:
+        {{- range .startupTaints }}
+        - key: {{ .key }}
+          effect: {{ .effect }}
+          {{- if .value }}
+          value: {{ .value | quote }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      
+      {{- if .requirements }}
+      requirements:
+        {{- range .requirements }}
+        - key: {{ .key }}
+          operator: {{ .operator }}
+          values:
+            {{- range .values }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- if .minValues }}
+          minValues: {{ .minValues }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+  
+  {{- if .disruption }}
+  disruption:
+    {{- if .disruption.consolidationPolicy }}
+    consolidationPolicy: {{ .disruption.consolidationPolicy }}
+    {{- end }}
+    {{- if .disruption.consolidateAfter }}
+    consolidateAfter: {{ .disruption.consolidateAfter }}
+    {{- end }}
+    {{- if .disruption.budgets }}
+    budgets:
+      {{- range .disruption.budgets }}
+      - nodes: {{ .nodes | quote }}
+        {{- if .schedule }}
+        schedule: {{ .schedule | quote }}
+        {{- end }}
+        {{- if .duration }}
+        duration: {{ .duration }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  
+  {{- if .limits }}
+  limits:
+    {{- range $key, $value := .limits }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+  
+  {{- if .weight }}
+  weight: {{ .weight }}
+  {{- end }}
+{{- end }}
+{{- end }}
