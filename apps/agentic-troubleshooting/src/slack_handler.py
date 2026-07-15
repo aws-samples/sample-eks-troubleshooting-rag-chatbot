@@ -244,7 +244,27 @@ class SlackHandler:
             return None  # Return None to indicate no response should be sent
         except Exception as e:
             logger.error(f"Orchestrator error: {e}")
-            return "Error processing request. Please try again."
+            error_msg = str(e)
+            
+            # Bedrock model errors
+            if "ResourceNotFoundException" in error_msg:
+                return ("⚠️ *Bedrock Model Error*: The configured AI model is unavailable or has reached end-of-life. "
+                        f"Please check the `BEDROCK_MODEL_ID` configuration.\n_Detail: {error_msg[:200]}_")
+            elif "ValidationException" in error_msg and "InvokeModel" in error_msg:
+                return ("⚠️ *Bedrock Model Error*: The model invocation failed (possibly unsupported model ID or missing inference profile). "
+                        f"Please check `BEDROCK_MODEL_ID` and `CLASSIFICATION_MODEL_ID` configurations.\n_Detail: {error_msg[:200]}_")
+            elif "AccessDeniedException" in error_msg:
+                return ("🔒 *Bedrock Access Denied*: The agent does not have permission to invoke the configured model. "
+                        "Check the IAM role's Bedrock permissions.")
+            elif "ThrottlingException" in error_msg:
+                return "⏳ *Rate Limited*: Too many requests to Bedrock. Please wait a moment and try again."
+            elif "ModelTimeoutException" in error_msg or "TimeoutError" in error_msg:
+                return "⏱️ *Timeout*: The AI model took too long to respond. Please try again with a simpler question."
+            elif "BrokenPipeError" in error_msg or "ConnectionError" in error_msg or "SSLError" in error_msg:
+                return ("🔌 *Connection Error*: Lost connection to a downstream service. "
+                        "The agent is reconnecting automatically — please try again in a few seconds.")
+            else:
+                return f"❌ *Error processing request*: {error_msg[:300]}\nPlease try again or check the agent logs."
         
 if __name__ == "__main__":
     # Configure logging
