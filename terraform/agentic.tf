@@ -206,10 +206,11 @@ resource "helm_release" "agentic_agent" {
       }
 
       config = {
-        clusterName    = module.eks.cluster_name
-        awsRegion      = local.region
-        bedrockModelId = var.bedrock_model_id
-        logLevel       = "INFO"
+        clusterName              = module.eks.cluster_name
+        awsRegion                = local.region
+        bedrockModelId           = var.bedrock_model_id
+        classificationModelId    = var.bedrock_classification_model_id
+        logLevel                 = "INFO"
 
         # Vector Storage Configuration
         vectorBucket = var.vector_bucket_name

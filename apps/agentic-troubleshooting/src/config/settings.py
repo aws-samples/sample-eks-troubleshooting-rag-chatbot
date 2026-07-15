@@ -54,7 +54,11 @@ class Config:
     
     @property
     def BEDROCK_MODEL_ID(self) -> str:
-        return os.getenv('BEDROCK_MODEL_ID', 'anthropic.claude-3-sonnet-20240229-v1:0')
+        return os.getenv('BEDROCK_MODEL_ID', 'us.anthropic.claude-sonnet-4-20250514-v1:0')
+    
+    @property
+    def CLASSIFICATION_MODEL_ID(self) -> str:
+        return os.getenv('CLASSIFICATION_MODEL_ID', 'us.amazon.nova-micro-v1:0')
     
     @property
     def AGENT_NAME(self) -> str:

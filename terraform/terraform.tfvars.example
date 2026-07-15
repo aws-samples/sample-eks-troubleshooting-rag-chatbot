@@ -17,8 +17,11 @@ slack_app_token      = "xapp-your-app-token"
 slack_signing_secret = "your-signing-secret"
 
 # Amazon Bedrock Configuration
-# Default model for agentic troubleshooting
-bedrock_model_id = "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
+# Main orchestrator model (Claude Sonnet 4 recommended)
+bedrock_model_id = "us.anthropic.claude-sonnet-4-20250514-v1:0"
+
+# Classification model for message filtering (Nova Micro recommended)
+bedrock_classification_model_id = "us.amazon.nova-micro-v1:0"
 
 # S3 Vectors Configuration
 # Replace with your S3 vector bucket name after creating it
