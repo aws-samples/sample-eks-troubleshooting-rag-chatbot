@@ -51,9 +51,15 @@ variable "slack_signing_secret" {
 }
 
 variable "bedrock_model_id" {
-  description = "Amazon Bedrock model ID for AI agent"
+  description = "Amazon Bedrock model ID for AI agent (orchestrator)"
   type        = string
-  default     = "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
+  default     = "us.anthropic.claude-sonnet-4-20250514-v1:0"
+}
+
+variable "bedrock_classification_model_id" {
+  description = "Amazon Bedrock model ID for message classification (Nova)"
+  type        = string
+  default     = "us.amazon.nova-micro-v1:0"
 }
 
 variable "vector_bucket_name" {
