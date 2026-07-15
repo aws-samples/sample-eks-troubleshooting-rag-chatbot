@@ -69,7 +69,7 @@ class OrchestratorAgent:
             }
             
             response = self.bedrock_client.invoke_model(
-                modelId="amazon.nova-micro-v1:0",
+                modelId=Config.CLASSIFICATION_MODEL_ID,
                 body=json.dumps(body)
             )
             
@@ -82,6 +82,7 @@ class OrchestratorAgent:
             
         except Exception as e:
             logger.error(f"Nova classification failed: {e}")
+            logger.warning("Falling back to keyword-based classification")
             # Fallback to keyword matching
             return any(keyword in message.lower() for keyword in K8S_KEYWORDS)
         
